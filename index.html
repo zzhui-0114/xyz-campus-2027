@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a5fd8">
+<title>XYZ Robotics 星猿哲 × 2027校园招聘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f2f7ff;
+  --white:#ffffff;
+  --navy:#0c2760;
+  --blue:#1a5fd8;
+  --blue-mid:#3d7ef0;
+  --blue-lt:#dce9ff;
+  --blue-xl:#eef4ff;
+  --text:#1c2e52;
+  --muted:#5b739a;
+  --border:#c5d6f0;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans SC',sans-serif;overflow-x:hidden;font-size:16px;line-height:1.75}
+
+#canvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.6}
+section{position:relative;z-index:1}
+
+.wrap{max-width:680px;margin:0 auto;padding:0 24px}
+.sec{padding:80px 0}
+.sec-white{background:var(--white)}
+.sec-bg{background:var(--bg)}
+
+.label{display:inline-block;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--blue);background:var(--blue-lt);padding:4px 13px;border-radius:30px;margin-bottom:18px;text-transform:uppercase}
+.sh{font-family:'Noto Serif SC',serif;font-size:30px;font-weight:600;line-height:1.25;color:var(--navy);margin-bottom:10px}
+.sh em{color:var(--blue);font-style:normal}
+.sd{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:32px}
+
+.r{opacity:0;transform:translateY(22px);transition:opacity .65s ease,transform .65s ease}
+.r.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:200;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:680px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;color:var(--blue);letter-spacing:.06em}
+.logo b{color:var(--navy)}
+.nav-cta{background:var(--blue);color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:30px;text-decoration:none}
+
+/* HERO */
+#hero{min-height:100svh;background:linear-gradient(145deg,#0b3291 0%,#1a5fd8 55%,#4290ff 100%);display:flex;flex-direction:column;justify-content:center;padding:100px 0 80px;overflow:hidden}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:36px 36px;pointer-events:none}
+.hero-tag{font-family:'Orbitron',monospace;font-size:11px;letter-spacing:.22em;color:rgba(255,255,255,.65);margin-bottom:24px;opacity:0;animation:up .7s .2s ease forwards}
+.hero-h1{font-family:'Noto Serif SC',serif;font-size:46px;font-weight:600;line-height:1.18;color:#fff;margin-bottom:20px;opacity:0;animation:up .7s .4s ease forwards}
+.hero-h1 em{color:#9dcfff;font-style:normal}
+.hero-h1 b{color:#ffd166;font-weight:600}
+.hero-p{font-size:15px;color:rgba(255,255,255,.72);line-height:2;margin-bottom:36px;opacity:0;animation:up .7s .6s ease forwards}
+.hero-btns{display:flex;gap:14px;opacity:0;animation:up .7s .8s ease forwards}
+.btn-w{flex:1;text-align:center;background:#fff;color:var(--blue);padding:15px 10px;font-family:'Orbitron',monospace;font-size:12px;font-weight:900;letter-spacing:.07em;border-radius:40px;text-decoration:none}
+.btn-o{flex:1;text-align:center;border:2px solid rgba(255,255,255,.55);color:#fff;padding:15px 10px;font-family:'Orbitron',monospace;font-size:12px;letter-spacing:.07em;border-radius:40px;text-decoration:none}
+.hero-chips{margin-top:36px;display:flex;gap:8px;flex-wrap:wrap;opacity:0;animation:up .7s 1s ease forwards}
+.chip{font-size:12px;color:rgba(255,255,255,.8);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:5px 13px;border-radius:100px}
+.scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;opacity:0;animation:fadein 1s 1.4s ease forwards}
+.scroll-cue span{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:.18em;color:rgba(255,255,255,.45)}
+.scroll-bar{width:1px;height:30px;background:linear-gradient(to bottom,rgba(255,255,255,.5),transparent)}
+
+/* STATS – 4 cols on wide, 2x2 on narrow */
+#stats{background:var(--white)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.stat{background:#fff;padding:32px 16px;text-align:center}
+.stat-n{font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:var(--blue);line-height:1;margin-bottom:8px}
+.stat-l{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:420px){.stats-grid{grid-template-columns:repeat(2,1fr)}.stat-n{font-size:24px}}
+
+/* ABOUT */
+.about-quote{border-left:3px solid var(--blue);padding:18px 20px;font-family:'Noto Serif SC',serif;font-size:16px;line-height:1.9;color:var(--navy);background:var(--blue-xl);border-radius:0 10px 10px 0;margin-bottom:28px}
+.founders-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.founder{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:20px 14px;text-align:center}
+.f-avatar{width:56px;height:56px;border-radius:50%;background:var(--blue-lt);border:2.5px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--blue);margin:0 auto 10px}
+.f-role{font-family:'Orbitron',monospace;font-size:9px;color:var(--blue);font-weight:700;letter-spacing:.06em;margin-bottom:5px}
+.f-name{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.f-bio{font-size:11.5px;color:var(--muted);line-height:1.6}
+.inv-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:12px}
+.inv-chips{display:flex;flex-wrap:wrap;gap:9px}
+.inv-chip{font-size:13px;padding:6px 16px;background:var(--blue-xl);border:1px solid var(--border);border-radius:30px;color:var(--navy);font-weight:500}
+
+/* TECH – 2-col grid, last card full-width */
+.tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:8px}
+.tech-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px 20px;position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s}
+.tech-card:hover{box-shadow:0 8px 28px rgba(26,95,216,.12);transform:translateY(-2px)}
+.tech-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--blue-mid))}
+.tech-card.full{grid-column:1/-1}
+.tech-ico{font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:var(--blue-lt);line-height:1;margin-bottom:12px}
+.tech-name{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.tech-desc{font-size:14px;color:var(--muted);line-height:1.8}
+.tech-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tech-tag{font-size:10px;font-family:'Orbitron',monospace;color:var(--blue);background:var(--blue-lt);padding:3px 10px;border-radius:20px;font-weight:700}
+
+/* SCENES – 2-col card grid */
+.scene-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+.scene-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px 18px}
+.scene-n{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.1em;margin-bottom:10px}
+.scene-name{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:7px;line-height:1.3}
+.scene-desc{font-size:13px;color:var(--muted);line-height:1.7}
+.scene-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.scene-tag{font-size:11px;color:var(--blue);background:var(--blue-lt);padding:2px 9px;border-radius:20px;font-weight:500}
+.client-bar{margin-top:32px;padding-top:24px;border-top:1px solid var(--border)}
+.client-label{font-family:'Orbitron',monospace;font-size:10px;color:var(--muted);letter-spacing:.12em;margin-bottom:13px}
+.client-chips{display:flex;flex-wrap:wrap;gap:9px}
+.client-chip{font-size:13px;font-weight:700;color:var(--navy);background:var(--bg);border:1px solid var(--border);padding:7px 16px;border-radius:8px}
+
+/* CULTURE – 2x2 */
+.culture-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+.c-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px 18px}
+.c-ico{font-size:30px;margin-bottom:12px}
+.c-name{font-size:16px;font-weight:700;color:var(--blue);margin-bottom:8px}
+.c-desc{font-size:13px;color:var(--muted);line-height:1.75}
+.c-quote{margin-top:20px;background:var(--blue-xl);border:1px solid var(--border);border-radius:14px;padding:22px 20px;font-size:14px;color:var(--text);line-height:1.9}
+.c-quote b{color:var(--blue)}
+
+/* JOBS */
+.ycal{background:linear-gradient(130deg,var(--blue),var(--blue-mid));border-radius:14px;padding:26px 22px;text-align:center;color:#fff;margin-bottom:32px}
+.ycal-t{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:.08em;margin-bottom:8px}
+.ycal-d{font-size:14px;color:rgba(255,255,255,.85);line-height:1.75}
+.cat-block{margin-bottom:28px}
+.cat-hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cat-line{height:2px;flex:1;background:var(--blue-lt)}
+.cat-text{font-family:'Orbitron',monospace;font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.1em;white-space:nowrap}
+.job-list{display:flex;flex-direction:column;gap:10px}
+.job{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.job:hover,.job.open{border-color:var(--blue);box-shadow:0 3px 14px rgba(26,95,216,.1)}
+.job-top{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.job-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:5px}
+.job-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.job-arrow{font-size:24px;color:var(--blue);line-height:1;transition:transform .25s;flex-shrink:0}
+.job.open .job-arrow{transform:rotate(90deg)}
+.job-body{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.job.open .job-body{max-height:400px}
+.job-body-inner{padding:0 20px 20px;border-top:1px solid var(--border)}
+.job-body-inner ul{padding-top:14px}
+.job-body-inner li{font-size:14px;color:var(--muted);line-height:1.85;margin-left:18px;margin-bottom:5px}
+
+/* TIMELINE – year col + content col */
+.tl{margin-top:8px}
+.tl-row{display:grid;grid-template-columns:72px 1fr;gap:16px;padding-bottom:32px;position:relative}
+.tl-row::before{content:'';position:absolute;left:35px;top:10px;bottom:0;width:2px;background:var(--blue-lt)}
+.tl-row:last-child::before{display:none}
+.tl-yc{display:flex;flex-direction:column;align-items:center;padding-top:2px;gap:6px}
+.tl-dot{width:13px;height:13px;border-radius:50%;background:var(--white);border:3px solid var(--blue);z-index:1;flex-shrink:0}
+.tl-row:first-child .tl-dot{background:var(--blue)}
+.tl-year{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.05em;text-align:center;line-height:1.4}
+.tl-event{font-size:15px;font-weight:700;color:var(--navy);line-height:1.5;margin-bottom:5px}
+.tl-sub{font-size:13px;color:var(--muted);line-height:1.7}
+
+/* CTA */
+#cta{padding:80px 24px;background:linear-gradient(145deg,#0b3291,#1a5fd8);text-align:center}
+.cta-title{font-family:'Noto Serif SC',serif;font-size:34px;font-weight:600;line-height:1.3;color:#fff;margin-bottom:14px}
+.cta-title em{color:#9dcfff;font-style:normal}
+.cta-sub{font-size:15px;color:rgba(255,255,255,.72);line-height:1.9;margin-bottom:36px;max-width:440px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;flex-direction:column;gap:12px;max-width:360px;margin:0 auto 28px}
+.cta-btn-w{background:#fff;color:var(--blue);text-align:center;padding:17px;font-family:'Orbitron',monospace;font-size:13px;font-weight:900;letter-spacing:.1em;border-radius:40px;text-decoration:none;display:block}
+.cta-btn-o{border:2px solid rgba(255,255,255,.45);color:#fff;text-align:center;padding:15px;font-size:14px;border-radius:40px;text-decoration:none;display:block}
+.cta-contact{font-size:13px;color:rgba(255,255,255,.6)}
+.cta-contact a{color:#9dcfff;text-decoration:none}
+
+footer{padding:24px;text-align:center;font-size:12px;color:var(--muted);border-top:1px solid var(--border);background:var(--white)}
+
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">XYZ <b>ROBOTICS</b></div>
+    <a href="#cta" class="nav-cta">立即投递 →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="wrap" style="position:relative;z-index:1">
+    <p class="hero-tag">2027 CAMPUS RECRUITMENT · 星猿哲科技校园招聘</p>
+    <h1 class="hero-h1">赋予机器人<br><em>全自主感知</em><br>与<b>操作能力</b></h1>
+    <p class="hero-p">Pick anything. Place anywhere anyway.<br>从卡内基梅隆到麻省理工，从上海莘庄工业园到全球<br>我们正在用具身智能，变革人类的生产方式。</p>
+    <div class="hero-btns">
+      <a href="#jobs" class="btn-w">查看岗位</a>
+      <a href="#about" class="btn-o">了解我们</a>
+    </div>
+    <div class="hero-chips">
+      <span class="chip">国家级专精特新「小巨人」</span>
+      <span class="chip">上海潜在独角兽</span>
+      <span class="chip">累计融资超 1 亿美元</span>
+      <span class="chip">3000+ 落地场景</span>
+    </div>
+  </div>
+  <div class="scroll-cue">
+    <div class="scroll-bar"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<section id="stats">
+  <div class="stats-grid">
+    <div class="stat r"><div class="stat-n" data-target="1" data-suffix="亿+">0</div><div class="stat-l">累计融资<br>（美元）</div></div>
+    <div class="stat r d1"><div class="stat-n" data-target="3000" data-suffix="+">0</div><div class="stat-l">全球落地<br>场景数量</div></div>
+    <div class="stat r d2"><div class="stat-n" data-target="5" data-suffix="国">0</div><div class="stat-l">海外分支<br>机构</div></div>
+    <div class="stat r d3"><div class="stat-n">2018</div><div class="stat-l">公司<br>成立年份</div></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="sec sec-white">
+  <div class="wrap">
+    <div class="r"><span class="label">About Us</span></div>
+    <h2 class="sh r d1">专注<em>具身智能</em>，重新定义工业自动化</h2>
+    <p class="sd r d2">星猿哲科技（XYZ Robotics）聚焦移动操作机器人与 3D 视觉产品，将前沿的 3D 感知、运动规划、强化学习等具身智能技术应用于物流自动化场景，服务宝马、博世、比亚迪、京东等全球知名企业。</p>
+    <div class="about-quote r d2">「机器人识别、抓取和放置不同物体的能力，是机器智能的圣杯技术。XYZ Robotics 拥有行业领先的技术和世界级团队，会率先将这项能力输出各个行业。」</div>
+    <div class="founders-grid r d3">
+      <div class="founder">
+        <div class="f-avatar">ZJJ</div>
+        <div class="f-role">CEO</div>
+        <div class="f-name">周佳骥 博士</div>
+        <div class="f-bio">CMU 机器人学博士，2016 年 ICRA 最佳论文奖得主</div>
+      </div>
+      <div class="founder">
+        <div class="f-avatar">YGT</div>
+        <div class="f-role">CTO</div>
+        <div class="f-name">俞冠廷 博士</div>
+        <div class="f-bio">MIT EECS 博士，亚马逊机器人挑战赛三届全球前三</div>
+      </div>
+      <div class="founder">
+        <div class="f-avatar">XLB</div>
+        <div class="f-role">COO</div>
+        <div class="f-name">邢梁立博</div>
+        <div class="f-bio">北京大学经济学硕士，负责公司商务与运营管理</div>
+      </div>
+    </div>
+    <div class="r d4">
+      <div class="inv-label">BACKED BY · 顶级投资机构</div>
+      <div class="inv-chips">
+        <span class="inv-chip">今日资本</span><span class="inv-chip">源码资本</span><span class="inv-chip">高榕资本</span>
+        <span class="inv-chip">五源资本</span><span class="inv-chip">创新工场</span><span class="inv-chip">晨兴资本</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section id="tech" class="sec sec-bg">
+  <div class="wrap">
+    <div class="r"><span class="label">Core Technology</span></div>
+    <h2 class="sh r d1">三大核心<em>技术壁垒</em></h2>
+    <p class="sd r d1">从感知到决策到执行，构建完整的机器人智能闭环</p>
+    <div class="tech-grid">
+      <div class="tech-card r d2">
+        <div class="tech-ico">3D</div>
+        <div class="tech-name">工业级 3D 视觉感知</div>
+        <div class="tech-desc">自研 3D 相机与感知算法，0.4 秒识别万级 SKU，无需预注册模型，适应海量动态场景。</div>
+        <div class="tech-tags"><span class="tech-tag">3D Camera</span><span class="tech-tag">Point Cloud</span><span class="tech-tag">Pose Est.</span></div>
+      </div>
+      <div class="tech-card r d3">
+        <div class="tech-ico">∇</div>
+        <div class="tech-name">运动规划与控制</div>
+        <div class="tech-desc">无碰撞最优路径规划，全球最快末端执行器快换系统（0.6 秒），覆盖多品类物品抓取。</div>
+        <div class="tech-tags"><span class="tech-tag">Motion Plan</span><span class="tech-tag">Gripper</span><span class="tech-tag">RTOS</span></div>
+      </div>
+      <div class="tech-card full r d4">
+        <div class="tech-ico">AI</div>
+        <div class="tech-name">具身智能 · 强化学习</div>
+        <div class="tech-desc">融合 3D 感知、规控与强化学习，实现机器人在复杂非结构化场景中自主决策与操作。入围全球顶尖机器人学会议 ICRA Stacking Challenge 全球前三，引领具身智能下一代技术突破。</div>
+        <div class="tech-tags"><span class="tech-tag">Embodied AI</span><span class="tech-tag">Reinf. Learning</span><span class="tech-tag">Sim2Real</span><span class="tech-tag">ICRA Top 3</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENES -->
+<section id="scenes" class="sec sec-white">
+  <div class="wrap">
+    <div class="r"><span class="label">Applications</span></div>
+    <h2 class="sh r d1">核心<em>落地场景</em></h2>
+    <p class="sd r d1">已广泛应用于快消、医药、汽车、新能源、电商等行业头部企业</p>
+    <div class="scene-grid">
+      <div class="scene-card r d1">
+        <div class="scene-n">SCENE 01</div>
+        <div class="scene-name">移动复合机器人装卸车</div>
+        <div class="scene-desc">行业首发双臂移动复合机器人，实现集装箱全自动卸车作业。</div>
+        <div class="scene-tags"><span class="scene-tag">3PL</span><span class="scene-tag">快消</span><span class="scene-tag">电商</span></div>
+      </div>
+      <div class="scene-card r d2">
+        <div class="scene-n">SCENE 02</div>
+        <div class="scene-name">小件无序分拣拆零拣选</div>
+        <div class="scene-desc">重量+视觉双重校验，海量 SKU 免注册，效率达人工 1.5 倍以上。</div>
+        <div class="scene-tags"><span class="scene-tag">医药</span><span class="scene-tag">日化</span><span class="scene-tag">消费品</span></div>
+      </div>
+      <div class="scene-card r d3">
+        <div class="scene-n">SCENE 03</div>
+        <div class="scene-name">拆码垛 · 混码垛</div>
+        <div class="scene-desc">多品类异形包装精准识别与规整堆垛，服务汽车、新能源、制造业。</div>
+        <div class="scene-tags"><span class="scene-tag">汽车</span><span class="scene-tag">新能源</span><span class="scene-tag">制造</span></div>
+      </div>
+      <div class="scene-card r d4">
+        <div class="scene-n">SCENE 04</div>
+        <div class="scene-name">深筐上下料工业装配</div>
+        <div class="scene-desc">深框内零部件无序抓取与装配，解决汽车、铸造工业上料难题。</div>
+        <div class="scene-tags"><span class="scene-tag">铸造</span><span class="scene-tag">汽配</span><span class="scene-tag">精密制造</span></div>
+      </div>
+    </div>
+    <div class="client-bar r d3">
+      <div class="client-label">GLOBAL CLIENTS · 头部客户</div>
+      <div class="client-chips">
+        <span class="client-chip">BMW</span><span class="client-chip">BOSCH</span><span class="client-chip">比亚迪</span>
+        <span class="client-chip">京东</span><span class="client-chip">宜得利</span><span class="client-chip">丸红物流</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CULTURE -->
+<section id="culture" class="sec sec-bg">
+  <div class="wrap">
+    <div class="r"><span class="label">Our Culture</span></div>
+    <h2 class="sh r d1">我们的<em>工作文化</em></h2>
+    <p class="sd r d1">没有阶级，没有官僚——只有共同目标和灿烂的想法</p>
+    <div class="culture-grid">
+      <div class="c-card r d1"><div class="c-ico">⚖️</div><div class="c-name">平等</div><div class="c-desc">没有"XX总""XX老师"，没有职场阶级，只为同一个目标共同奋斗</div></div>
+      <div class="c-card r d2"><div class="c-ico">🤝</div><div class="c-name">尊重</div><div class="c-desc">每个人的声音都被听到，独立思想碰撞出最灿烂的火花</div></div>
+      <div class="c-card r d3"><div class="c-ico">🚀</div><div class="c-name">成长</div><div class="c-desc">广阔发展空间，快速调薪晋升，拒绝螺丝钉，与 XYZ 共同成长</div></div>
+      <div class="c-card r d4"><div class="c-ico">⚡</div><div class="c-name">效率</div><div class="c-desc">绩效导向·能力导向，拒绝无效 996，天空也不是你的极限</div></div>
+    </div>
+    <div class="c-quote r d3">研发团队来自 <b>CMU、MIT、上交、清华、浙大、哈工大</b> 等国内外顶尖院校——在这里，你不是一颗螺丝钉，而是推动机器人智能进化的<b>核心力量</b>。</div>
+  </div>
+</section>
+
+<!-- JOBS -->
+<section id="jobs" class="sec sec-white">
+  <div class="wrap">
+    <div class="r"><span class="label">Campus Recruitment</span></div>
+    <h2 class="sh r d1">2027届<em>校园招聘</em>岗位</h2>
+    <p class="sd r d1">欢迎计算机 / 机器人 / 自动化 / 机械 / 电子工程等相关专业应届生</p>
+    <div class="ycal r d2">
+      <div class="ycal-t">★ Y-PLAN「Y 计划」技术培训生</div>
+      <div class="ycal-d">专为应届生打造的成长通道 · 系统技术培训 + 轮岗学习 + 导师带飞，快速成为核心技术骨干</div>
+    </div>
+
+    <div class="cat-block r d3">
+      <div class="cat-hd"><span class="cat-text">ALGORITHM · 算法研发</span><div class="cat-line"></div></div>
+      <div class="job-list">
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">机器人视觉算法工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 硕士优先</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>负责 3D 视觉感知算法研发，含点云处理、物体位姿估计与目标检测</li>
+            <li>深度学习框架 PyTorch / TensorFlow，熟悉 C++ / Python</li>
+            <li>计算机视觉、图像处理理论基础扎实</li>
+            <li>计算机 / 自动化 / 机器人 / 电子信息等相关专业</li>
+          </ul></div></div>
+        </div>
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">运动控制算法工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 硕博优先</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>机械臂运动规划、轨迹生成与实时控制算法开发</li>
+            <li>熟悉机器人运动学 / 动力学建模，力控 / 阻抗控制经验优先</li>
+            <li>熟悉 ROS / ROS2，C++ 开发能力强</li>
+            <li>控制 / 自动化 / 机器人学相关专业背景</li>
+          </ul></div></div>
+        </div>
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">机器人系统研发工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 本科及以上</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>机器人整体软件系统架构设计与多模块联调优化</li>
+            <li>视觉、运动规划、控制多模块集成与性能调优</li>
+            <li>熟悉 ROS2、C++ / Python，有机器人系统项目经验优先</li>
+            <li>计算机 / 机器人 / 自动化等相关专业</li>
+          </ul></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-block r d3">
+      <div class="cat-hd"><span class="cat-text">HARDWARE · 硬件工程</span><div class="cat-line"></div></div>
+      <div class="job-list">
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">硬件测试工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 本科及以上</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>机器人硬件模块（控制器 / 传感器 / 执行器）测试方案设计与执行</li>
+            <li>编写测试用例、缺陷报告，推动问题闭环</li>
+            <li>了解电路原理，熟悉示波器、万用表等常用仪器</li>
+            <li>电子工程 / 自动化 / 机电一体化等相关专业</li>
+          </ul></div></div>
+        </div>
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">机械结构工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 本科及以上</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>机器人本体结构、末端执行器及夹具设计与优化</li>
+            <li>熟练使用 SolidWorks / CATIA，能完成工程图纸输出</li>
+            <li>了解机加工、钣金工艺，有结构仿真经验优先</li>
+            <li>机械工程 / 机械设计 / 机电一体化相关专业</li>
+          </ul></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cat-block r d4">
+      <div class="cat-hd"><span class="cat-text">SOFTWARE · 软件工程</span><div class="cat-line"></div></div>
+      <div class="job-list">
+        <div class="job" onclick="tog(this)">
+          <div class="job-top"><div><div class="job-title">软件测试工程师</div><div class="job-meta"><span>📍 上海莘庄工业园</span><span>🎓 本科及以上</span></div></div><div class="job-arrow">›</div></div>
+          <div class="job-body"><div class="job-body-inner"><ul>
+            <li>机器人软件系统功能测试、回归测试与自动化测试框架搭建</li>
+            <li>编写测试计划、用例及报告，与研发协作推动缺陷修复</li>
+            <li>熟悉 Python / Shell 脚本，了解 ROS / Linux 环境优先</li>
+            <li>计算机 / 软件工程 / 信息技术等相关专业</li>
+          </ul></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section id="timeline" class="sec sec-bg">
+  <div class="wrap">
+    <div class="r"><span class="label">Milestones</span></div>
+    <h2 class="sh r d1">星猿哲<em>成长历程</em></h2>
+    <div class="tl" style="margin-top:32px">
+      <div class="tl-row r d1">
+        <div class="tl-yc"><div class="tl-dot"></div><div class="tl-year">2018</div></div>
+        <div><div class="tl-event">星猿哲科技成立，总部落地上海莘庄工业园</div><div class="tl-sub">CMU、MIT 博士联合创立，完成天使轮融资</div></div>
+      </div>
+      <div class="tl-row r d2">
+        <div class="tl-yc"><div class="tl-dot"></div><div class="tl-year">2019</div></div>
+        <div><div class="tl-event">全球首套多品类混杂商品播种自动化拣选工作站落地</div><div class="tl-sub">国内头部物流企业苏州仓库，效率达人工 1.5 倍以上</div></div>
+      </div>
+      <div class="tl-row r d2">
+        <div class="tl-yc"><div class="tl-dot"></div><div class="tl-year">2020–21</div></div>
+        <div><div class="tl-event">完成 A 轮、A+ 轮融资，入选上海潜在独角兽企业</div><div class="tl-sub">累计融资超 3000 万美元，被评为重点 AI 企业</div></div>
+      </div>
+      <div class="tl-row r d3">
+        <div class="tl-yc"><div class="tl-dot"></div><div class="tl-year">2022–23</div></div>
+        <div><div class="tl-event">完成 B+ 轮，累计融资超 1 亿美元；发布行业首发双臂移动复合机器人</div><div class="tl-sub">入围 ICRA Stacking Challenge 全球前三</div></div>
+      </div>
+      <div class="tl-row r d4">
+        <div class="tl-yc"><div class="tl-dot"></div><div class="tl-year">2024–25</div></div>
+        <div><div class="tl-event">获评国家级专精特新「小巨人」，全球拓展至美国 / 德国 / 日本 / 韩国</div><div class="tl-sub">服务宝马、博世、比亚迪、京东、宜得利等，3000+ 场景落地</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="r">
+    <div class="cta-title">加入星猿哲<br>共建<em>机器人智能</em>未来</div>
+    <p class="cta-sub">我们期待来自卡内基梅隆、MIT、清华、上交、浙大、哈工大以及全球各顶尖院校的你——在这里，你的代码会真的改变世界。</p>
+    <div class="cta-btns">
+      <a href="https://www.xyzrobotics.com.cn/careers" class="cta-btn-w" target="_blank">→ 前往官网投递简历</a>
+      <a href="https://www.zhipin.com" class="cta-btn-o" target="_blank">在 BOSS直聘 上找到我们</a>
+    </div>
+    <div class="cta-contact">
+      招聘咨询 · <a href="mailto:shumin.lei@xyzrobotics.com">shumin.lei@xyzrobotics.com</a><br>
+      官网：<a href="https://www.xyzrobotics.com.cn" target="_blank">xyzrobotics.com.cn</a>
+    </div>
+  </div>
+</section>
+
+<footer>© 2025 星猿哲科技（上海）有限公司 · XYZ Robotics China Inc. · 上海市闵行区莘庄工业园</footer>
+
+<script>
+(function(){
+  const c=document.getElementById('canvas'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  const rs=()=>{W=c.width=window.innerWidth;H=c.height=window.innerHeight};
+  rs();window.addEventListener('resize',rs);
+  const mk=()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.2+.4});
+  for(let i=0;i<55;i++)pts.push(mk());
+  (function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(26,95,216,.18)';ctx.fill();
+    });
+    pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<110){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(26,95,216,${.06*(1-d/110)})`;ctx.lineWidth=.5;ctx.stroke();}
+    }));
+    requestAnimationFrame(draw);
+  })();
+})();
+
+let counted=false;
+function animCounters(){
+  document.querySelectorAll('[data-target]').forEach(el=>{
+    const t=+el.dataset.target,sf=el.dataset.suffix||'';
+    let s=null;
+    (function step(ts){
+      if(!s)s=ts;
+      const p=Math.min((ts-s)/1600,1),e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(e*t)+sf;
+      if(p<1)requestAnimationFrame(step);
+    })(performance.now());
+  });
+}
+
+const io=new IntersectionObserver(en=>{
+  en.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      if(!counted&&e.target.closest('#stats')){counted=true;animCounters();}
+    }
+  });
+},{threshold:.12});
+document.querySelectorAll('.r').forEach(el=>io.observe(el));
+
+function tog(el){
+  const open=el.classList.contains('open');
+  document.querySelectorAll('.job.open').forEach(j=>j.classList.remove('open'));
+  if(!open)el.classList.add('open');
+}
+</script>
+</body>
+</html>
